@@ -1,5 +1,6 @@
 package dadm.frba.utn.edu.ar.ufceventfinder;
 
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -8,9 +9,17 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
+import java.io.IOException;
+import java.net.URL;
+
+import dadm.frba.utn.edu.ar.ufceventfinder.utilities.NetworkUtils;
+
 public class MainActivity extends AppCompatActivity {
 
-    private TextView mUFCEvent;
+    private TextView mUFCTitle;
+    private TextView mUFCEventsResults;
     private TextView mErrorMessageDisplay;
     private ProgressBar mLoadingIndicator;
 
@@ -19,8 +28,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mUFCEvent = (TextView) findViewById(R.id.tv_tittle);
-        mUFCEvent.setText("UFC Event Dummy");
+        mUFCTitle = (TextView) findViewById(R.id.tv_tittle);
+
+        mUFCEventsResults = (TextView) findViewById(R.id.tv_results);
+        mUFCEventsResults.setText("UFC Event Dummy");
 
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
@@ -28,14 +39,49 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showErrorMessage(){
-        mUFCEvent.setVisibility(View.INVISIBLE);
+        mUFCEventsResults.setVisibility(View.INVISIBLE);
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
 
     private void showUFCEvents(){
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
-        mUFCEvent.setVisibility(View.VISIBLE);
+        mUFCEventsResults.setVisibility(View.VISIBLE);
     }
+
+
+    public class UFCNetworkTask extends AsyncTask<URL, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mLoadingIndicator.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected String doInBackground(URL... params) {
+            URL searchUrl = params[0];
+            String UFCEventsResults = null;
+            try {
+                UFCEventsResults = NetworkUtils.getResponseFromHttpUrl(searchUrl);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return UFCEventsResults;
+        }
+
+        @Override
+        protected void onPostExecute(String UFCEventsResult) {
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+            if (UFCEventsResult != null && !UFCEventsResult.equals("")) {
+                showUFCEvents();
+                mUFCEventsResults.setText(UFCEventsResult);
+            } else {
+                showErrorMessage();
+            }
+        }
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

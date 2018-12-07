@@ -27,9 +27,15 @@
                 android:id="@+id/tv_results"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="UFC Events"
+                android:text="UFC Events Will Appear Here"
                 android:textSize="18sp"/>
+
         </ScrollView>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_results"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"/>
 
         <TextView
             android:id="@+id/tv_error_message_display"

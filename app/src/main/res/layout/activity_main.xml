@@ -11,9 +11,9 @@
         android:id="@+id/tv_tittle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="UFC Event Finder"
+        android:text="@string/search_instruction"
         android:layout_marginTop="8dp"
-        android:textSize="20dp" />
+        android:textSize="20sp" />
 
     <FrameLayout
         android:layout_width="match_parent"

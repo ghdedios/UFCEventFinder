@@ -9,8 +9,6 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.io.IOException;
 import java.net.URL;
 
@@ -36,6 +34,11 @@ public class MainActivity extends AppCompatActivity {
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
+    }
+
+    private void makeSearch() {
+        URL UFCEventSearchURL = NetworkUtils.buildUrl();
+        new UFCNetworkTask().execute(UFCEventSearchURL);
     }
 
     private void showErrorMessage(){
@@ -92,8 +95,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemThatWasClicked = item.getItemId();
-        if(itemThatWasClicked == R.id.action_refresh){
-            //TODO: replace with making the search again
+        if(itemThatWasClicked == R.id.action_search){
+            makeSearch();
             return true;
         }
         return super.onOptionsItemSelected(item);

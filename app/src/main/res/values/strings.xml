@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">UFCEventFinder</string>
     <string name="error_message">Failed to get UFC Events from Server. Please try again.</string>
+    <string name="refresh">Refresh</string>
 </resources>

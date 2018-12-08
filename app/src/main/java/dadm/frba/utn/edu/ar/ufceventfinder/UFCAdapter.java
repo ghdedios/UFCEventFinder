@@ -11,13 +11,16 @@ import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.net.URL;
 
 public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHolder>  {
 
     private int mNumberItems;
 
-    private String[] mUFCEventsData;
+    private JSONObject[] mUFCEventsData;
 
     public UFCAdapter(int numberOfItems){
         mNumberItems = numberOfItems;
@@ -39,10 +42,24 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
 
     @Override
     public void onBindViewHolder(@NonNull UFCEventViewHolder holder, int i) {
-        String ufcEvent = mUFCEventsData[i];
+        JSONObject ufcEvent = mUFCEventsData[i];
 
-        //TODO: Convert ufcEvent to JSON and get the info for bind method or create an Event class
-        holder.bind(ufcEvent,ufcEvent,1);
+        String description = null;
+        String location = null;
+        String imageURL = null;
+
+        try {
+            description = ufcEvent.getString("description");
+            location = ufcEvent.getString("location");
+            imageURL = ufcEvent.getString("imageURL");
+            //TODO:add DATE
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+
+
+        //TODO: add DATE
+        holder.bind(imageURL,description,1);
     }
 
     @Override
@@ -53,8 +70,8 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
         return mUFCEventsData.length;
     }
 
-
-    public void setUFCEventsData(String[] ufcEventsData) {
+    //TODO: delete
+    public void setUFCEventsData(JSONObject[] ufcEventsData) {
         mUFCEventsData = ufcEventsData;
         notifyDataSetChanged();
     }

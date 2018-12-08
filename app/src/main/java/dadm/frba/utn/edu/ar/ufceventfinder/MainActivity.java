@@ -11,10 +11,14 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.URL;
 
 import dadm.frba.utn.edu.ar.ufceventfinder.utilities.NetworkUtils;
+import dadm.frba.utn.edu.ar.ufceventfinder.utilities.UFCJsonUtils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -65,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public class UFCNetworkTask extends AsyncTask<URL, Void, String[]> {
+    public class UFCNetworkTask extends AsyncTask<URL, Void, JSONObject[]> {
 
         @Override
         protected void onPreExecute() {
@@ -74,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected String[] doInBackground(URL... params) {
+        protected JSONObject[] doInBackground(URL... params) {
 
             if(params.length == 0){
                 return null;
@@ -84,22 +88,24 @@ public class MainActivity extends AppCompatActivity {
             String UFCEventsResults = null;
             try {
                 UFCEventsResults = NetworkUtils.getResponseFromHttpUrl(searchUrl);
+                JSONObject[] UFCEventsJsons = UFCJsonUtils.getSimpleEventsJsonsFromWholeJson(MainActivity.this,UFCEventsResults);
+                return UFCEventsJsons;
             } catch (IOException e) {
                 e.printStackTrace();
+                return null;
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return null;
             }
-            String[] lala = new String[10];
-            lala[0] = UFCEventsResults;
-            return lala;
-            //return UFCEventsResults;
         }
 
         @Override
-        protected void onPostExecute(String[] UFCEventsResult) {
+        protected void onPostExecute(JSONObject[] UFCEventsResult) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
             if (UFCEventsResult != null) {
                 showUFCEvents();
                 mAdapter.setUFCEventsData(UFCEventsResult);
-                mUFCEventsResults.setText(UFCEventsResult[0]);
+                mUFCEventsResults.setText(UFCEventsResult[0].toString());
             } else {
                 showErrorMessage();
             }

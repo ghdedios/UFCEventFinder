@@ -8,7 +8,7 @@ import org.json.JSONObject;
 
 public final class UFCJsonUtils {
 
-    public static JSONObject[] getSimpleEventsStringsFromJson(Context context, String eventsJsonStr)
+    public static JSONObject[] getSimpleEventsJsonsFromWholeJson(Context context, String eventsJsonStr)
             throws JSONException {
 
         // The description is the "base_title" element of the json
@@ -20,8 +20,9 @@ public final class UFCJsonUtils {
         // The event image URL/s are these elements of the json. We will need both.
         final String UFC_image_URL = "feature_image";
         final String UFC_secondary_image_URL = "secondary_feature_image";
+        //TODO: Add DATE
 
-        JSONObject[] parsedUFCEventsData = null;
+        JSONObject[] parsedUFCEventsData;
 
         //TODO: Delete this comment if the instantiation of JSONArray works fine
 //        JSONObject eventsJson = new JSONObject(eventsJsonStr);
@@ -35,6 +36,7 @@ public final class UFCJsonUtils {
             String location;
             String imageURL;
             String secondImageURL;
+
 
             /* Get the JSON object representing the event */
             JSONObject singleUFCEvent = ufcEventsJson.getJSONObject(i);

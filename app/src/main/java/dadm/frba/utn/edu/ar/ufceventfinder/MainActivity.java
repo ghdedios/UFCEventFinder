@@ -3,6 +3,8 @@ package dadm.frba.utn.edu.ar.ufceventfinder;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +23,10 @@ public class MainActivity extends AppCompatActivity {
     private TextView mErrorMessageDisplay;
     private ProgressBar mLoadingIndicator;
 
+    private static final int NUM_LIST_ITEMS = 100;
+    private UFCAdapter mAdapter;
+    private RecyclerView mUFCEventsList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +39,13 @@ public class MainActivity extends AppCompatActivity {
 
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+
+        mUFCEventsList = (RecyclerView) findViewById(R.id.rv_results);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        mUFCEventsList.setLayoutManager(layoutManager);
+        mUFCEventsList.setHasFixedSize(true);
+        mAdapter = new UFCAdapter(NUM_LIST_ITEMS);
+        mUFCEventsList.setAdapter(mAdapter);
 
     }
 
@@ -52,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public class UFCNetworkTask extends AsyncTask<URL, Void, String> {
+    public class UFCNetworkTask extends AsyncTask<URL, Void, String[]> {
 
         @Override
         protected void onPreExecute() {
@@ -61,7 +74,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected String doInBackground(URL... params) {
+        protected String[] doInBackground(URL... params) {
+
+            if(params.length == 0){
+                return null;
+            }
+
             URL searchUrl = params[0];
             String UFCEventsResults = null;
             try {
@@ -69,15 +87,19 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return UFCEventsResults;
+            String[] lala = new String[10];
+            lala[0] = UFCEventsResults;
+            return lala;
+            //return UFCEventsResults;
         }
 
         @Override
-        protected void onPostExecute(String UFCEventsResult) {
+        protected void onPostExecute(String[] UFCEventsResult) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (UFCEventsResult != null && !UFCEventsResult.equals("")) {
+            if (UFCEventsResult != null) {
                 showUFCEvents();
-                mUFCEventsResults.setText(UFCEventsResult);
+                mAdapter.setUFCEventsData(UFCEventsResult);
+                mUFCEventsResults.setText(UFCEventsResult[0]);
             } else {
                 showErrorMessage();
             }

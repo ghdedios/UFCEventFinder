@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.facebook.common.util.UriUtil;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import org.json.JSONException;
@@ -97,8 +98,14 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
 
         void bind(String imageUrl, String description, int distance){
 
-            if (imageUrl != null){
+            if (imageUrl != null && !imageUrl.equals("")){
                 Uri uri = Uri.parse(imageUrl);
+                mEventImage.setImageURI(uri);
+            }else{
+                Uri uri =  new Uri.Builder()
+                        .scheme(UriUtil.LOCAL_RESOURCE_SCHEME)
+                        .path(String.valueOf(R.mipmap.ic_launcher))
+                        .build();
                 mEventImage.setImageURI(uri);
             }
             mEventDescription.setText(description);

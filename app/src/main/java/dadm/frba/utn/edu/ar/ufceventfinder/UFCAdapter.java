@@ -96,8 +96,11 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
         }
 
         void bind(String imageUrl, String description, int distance){
-            Uri uri = Uri.parse(imageUrl);
-            mEventImage.setImageURI(uri);
+
+            if (imageUrl != null){
+                Uri uri = Uri.parse(imageUrl);
+                mEventImage.setImageURI(uri);
+            }
             mEventDescription.setText(description);
             mEventDistance.setText(String.valueOf(distance));
         }

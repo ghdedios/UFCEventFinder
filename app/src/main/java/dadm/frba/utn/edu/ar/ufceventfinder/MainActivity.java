@@ -189,8 +189,8 @@ public class MainActivity extends AppCompatActivity {
                     Manifest.permission.ACCESS_FINE_LOCATION)) {
 
                 new AlertDialog.Builder(this)
-                        .setTitle("Location Permission Needed")
-                        .setMessage("This app needs the Location permission, please accept to use location functionality")
+                        .setTitle("Location Permission is Highly Recommended")
+                        .setMessage("This app needs the Location permission to show the distance from your location to the UFC Event, please accept to use location functionality")
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     // permission denied, boo!
-                    Toast.makeText(this, "permission denied", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Permission denied, Distance to Event will not be shown", Toast.LENGTH_LONG).show();
                     makeSearch();
                 }
                 return;

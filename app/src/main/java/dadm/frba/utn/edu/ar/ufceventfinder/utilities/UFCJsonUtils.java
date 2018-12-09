@@ -20,12 +20,11 @@ public final class UFCJsonUtils {
         // The event image URL/s are these elements of the json. We will need both.
         final String UFC_image_URL = "feature_image";
         final String UFC_secondary_image_URL = "secondary_feature_image";
-        //TODO: Add DATE
+
+        //The event date
+        final String UFC_date = "event_date";
 
         JSONObject[] parsedUFCEventsData;
-
-        //TODO: Delete this comment if the instantiation of JSONArray works fine
-//        JSONObject eventsJson = new JSONObject(eventsJsonStr);
 
         JSONArray ufcEventsJson = new JSONArray(eventsJsonStr);
 
@@ -36,6 +35,7 @@ public final class UFCJsonUtils {
             String location;
             String imageURL;
             String secondImageURL;
+            String date;
 
 
             /* Get the JSON object representing the event */
@@ -69,6 +69,13 @@ public final class UFCJsonUtils {
                 e.printStackTrace();
             }
 
+            try {
+                date = singleUFCEvent.getString(UFC_date);
+            }catch(JSONException e){
+                date = "null";
+                e.printStackTrace();
+            }
+
             JSONObject ufcSingleEventJson = new JSONObject();
             try{
                 ufcSingleEventJson.put("description",description);
@@ -80,15 +87,13 @@ public final class UFCJsonUtils {
                 }else{
                     ufcSingleEventJson.put("imageURL","null");
                 }
+                ufcSingleEventJson.put("date",date);
             }catch (JSONException e){
                 e.printStackTrace();
                 throw new RuntimeException(e);
             }
-
             parsedUFCEventsData[i] = ufcSingleEventJson;
         }
-
         return parsedUFCEventsData;
     }
-
 }

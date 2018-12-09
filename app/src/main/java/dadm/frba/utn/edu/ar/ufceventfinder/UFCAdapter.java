@@ -1,5 +1,6 @@
 package dadm.frba.utn.edu.ar.ufceventfinder;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -14,8 +15,16 @@ import com.facebook.drawee.view.SimpleDraweeView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.threeten.bp.DateTimeUtils;
+import org.threeten.bp.Instant;
 
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.util.Date;
 
 public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHolder>  {
 
@@ -48,19 +57,23 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
         String description = null;
         String location = null;
         String imageURL = null;
+        String dateString = null;
 
         try {
             description = ufcEvent.getString("description");
             location = ufcEvent.getString("location");
             imageURL = ufcEvent.getString("imageURL");
-            //TODO:add DATE
+            dateString = ufcEvent.getString("date");
         }catch (JSONException e){
             e.printStackTrace();
         }
 
+        Instant instant = Instant.parse(dateString);
+        Date realDate = DateTimeUtils.toDate(instant);
 
-        //TODO: add DATE
-        holder.bind(imageURL,description,1);
+
+
+        holder.bind(imageURL,description,1,realDate);
     }
 
     @Override
@@ -82,11 +95,14 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
         //Will display the UFC Event Image
         SimpleDraweeView mEventImage;
 
-        //Will display de UFC Event Description
+        //Will display the UFC Event Description
         TextView mEventDescription;
 
-        //Will display de UFC Event Distance (if it's defined)
+        //Will display the UFC Event Distance (if it's defined )
         TextView mEventDistance;
+
+        //Will display the UFC Event Date
+        TextView mEventDate;
 
         public UFCEventViewHolder (@NonNull View itemView) {
             super(itemView);
@@ -94,9 +110,15 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
             mEventImage = (SimpleDraweeView) itemView.findViewById(R.id.avatar);
             mEventDescription = (TextView) itemView.findViewById(R.id.tv_description);
             mEventDistance = (TextView) itemView.findViewById(R.id.tv_distance);
+            mEventDate = (TextView) itemView.findViewById(R.id.tv_date);
+
         }
 
-        void bind(String imageUrl, String description, int distance){
+        void bind(String imageUrl, String description, int distance, Date date){
+
+            @SuppressLint("SimpleDateFormat")
+            SimpleDateFormat simpleDate = new SimpleDateFormat("dd/MM/yyyy");
+            String dateString = simpleDate.format(date);
 
             if (imageUrl != null && !imageUrl.equals("")){
                 Uri uri = Uri.parse(imageUrl);
@@ -110,6 +132,7 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
             }
             mEventDescription.setText(description);
             mEventDistance.setText(String.valueOf(distance));
+            mEventDate.setText(dateString);
         }
     }
 

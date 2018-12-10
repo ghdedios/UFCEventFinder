@@ -1,9 +1,15 @@
 package dadm.frba.utn.edu.ar.ufceventfinder;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,19 +24,17 @@ import org.json.JSONObject;
 import org.threeten.bp.DateTimeUtils;
 import org.threeten.bp.Instant;
 
-import java.net.URL;
-import java.text.DateFormat;
-import java.text.FieldPosition;
-import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.time.OffsetDateTime;
 import java.util.Date;
+import java.util.List;
 
 public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHolder>  {
 
     private int mNumberItems;
 
     private JSONObject[] mUFCEventsData;
+
+    private Location mUserLocation;
 
     public UFCAdapter(int numberOfItems){
         mNumberItems = numberOfItems;
@@ -46,6 +50,11 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
 
         View view = inflater.inflate(layoutIdForListItem, viewGroup, false);
         UFCEventViewHolder viewHolder = new UFCEventViewHolder(view);
+
+        mUserLocation  = new Location("User");
+
+        //Get user location and save it in mUserLocation;
+
 
         return viewHolder;
     }
@@ -68,13 +77,13 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
             e.printStackTrace();
         }
 
+        //Parse String timestamp date into Date object
         Instant instant = Instant.parse(dateString);
         Date realDate = DateTimeUtils.toDate(instant);
 
-
-
-        holder.bind(imageURL,description,1,realDate);
+        holder.bind(imageURL,description,location,realDate);
     }
+
 
     @Override
     public int getItemCount() {
@@ -104,6 +113,9 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
         //Will display the UFC Event Date
         TextView mEventDate;
 
+        //Will contain the view for context use
+        View mView;
+
         public UFCEventViewHolder (@NonNull View itemView) {
             super(itemView);
 
@@ -111,15 +123,32 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
             mEventDescription = (TextView) itemView.findViewById(R.id.tv_description);
             mEventDistance = (TextView) itemView.findViewById(R.id.tv_distance);
             mEventDate = (TextView) itemView.findViewById(R.id.tv_date);
+            mView = itemView;
 
         }
 
-        void bind(String imageUrl, String description, int distance, Date date){
+        void bind(String imageUrl, String description, String location, Date date){
 
+            //Ask if Location Permission is granted
+            if (ContextCompat.checkSelfPermission(mView.getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED){
+                //Permission granted, now calculate the real distance
+                String distance = getDistanceAsString(mView.getContext(),location);
+                if (distance != null){
+                    location = distance;
+                }
+            }else{
+                //Nothing, the app will show the city name
+            }
+
+
+
+            //Format Date object to hardcoded Argentinian date format dd/MM/yyyy
             @SuppressLint("SimpleDateFormat")
             SimpleDateFormat simpleDate = new SimpleDateFormat("dd/MM/yyyy");
             String dateString = simpleDate.format(date);
 
+            //If there is an image URL, show it. If there isn't, show a local image
             if (imageUrl != null && !imageUrl.equals("")){
                 Uri uri = Uri.parse(imageUrl);
                 mEventImage.setImageURI(uri);
@@ -131,9 +160,50 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
                 mEventImage.setImageURI(uri);
             }
             mEventDescription.setText(description);
-            mEventDistance.setText(String.valueOf(distance));
+            mEventDistance.setText(location);
             mEventDate.setText(dateString);
         }
     }
 
+    private String getDistanceAsString(Context context, String locationAsString) {
+
+        Address addressFromLocation = getLocationFromCity(context,locationAsString);
+        Location eventLocation = new Location("Evento");
+
+        if (addressFromLocation != null){
+            eventLocation.setLatitude(addressFromLocation.getLatitude());
+            eventLocation.setLongitude(addressFromLocation.getLongitude());
+        }else{
+            return null;
+        }
+
+        if(mUserLocation == null || mUserLocation.toString() == "" || mUserLocation.getLatitude() == 0){
+            return null;
+        }else{
+            float distanceInKm = mUserLocation.distanceTo(eventLocation) /1000;
+            return String.valueOf(distanceInKm);
+        }
+    }
+
+    public Address getLocationFromCity(Context context, String city){
+
+        Geocoder coder = new Geocoder(context);
+        List<Address> address;
+
+        if (city == null){
+            return null;
+        }
+
+        try {
+            address = coder.getFromLocationName(city,1);
+            if (address == null || address.size()==0){
+                return null;
+            }
+            Address location = address.get(0);
+            return location;
+        } catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

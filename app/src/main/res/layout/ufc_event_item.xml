@@ -20,14 +20,18 @@
 
     <TextView
         android:id="@+id/tv_description"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:textSize="18sp"
         app:layout_constraintStart_toEndOf="@id/avatar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0"
-        android:text="Dummy Description"/>
+        android:text="Dummy Description"
+        app:autoSizeMaxTextSize="18sp"
+        app:autoSizeMinTextSize="8sp"
+        app:autoSizeStepGranularity="1sp"
+        app:autoSizeTextType="uniform"/>
 
     <TextView
         android:id="@+id/tv_date"
@@ -43,7 +47,7 @@
 
     <TextView
         android:id="@+id/tv_distance"
-        android:layout_width="wrap_content"
+        android:layout_width="90dp"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:text="Dummy km."
@@ -51,7 +55,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@id/avatar"
-        app:layout_constraintVertical_bias="0"/>
+        app:layout_constraintVertical_bias="0"
+        app:autoSizeMaxTextSize="16sp"
+        app:autoSizeMinTextSize="8sp"
+        app:autoSizeStepGranularity="1sp"
+        app:autoSizeTextType="uniform"
+        android:textAlignment="textEnd"/>
 
 
 </android.support.constraint.ConstraintLayout>

@@ -5,12 +5,13 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +27,8 @@ import org.threeten.bp.Instant;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
+
+import static android.support.v4.widget.TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM;
 
 public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHolder>  {
 
@@ -67,21 +69,32 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
         String location = null;
         String imageURL = null;
         String dateString = null;
+        double latitude = 0;
+        double longitude = 0;
 
         try {
             description = ufcEvent.getString("description");
             location = ufcEvent.getString("location");
             imageURL = ufcEvent.getString("imageURL");
             dateString = ufcEvent.getString("date");
+            latitude = ufcEvent.getDouble("latitude");
+            longitude = ufcEvent.getDouble("longitude");
+
         }catch (JSONException e){
             e.printStackTrace();
         }
+
+        //Parse latitude and longitude in an Location object
+        Location eventLocation = new Location("event location");
+        eventLocation.setLatitude(latitude);
+        eventLocation.setLongitude(longitude);
+        eventLocation.setProvider(location);
 
         //Parse String timestamp date into Date object
         Instant instant = Instant.parse(dateString);
         Date realDate = DateTimeUtils.toDate(instant);
 
-        holder.bind(imageURL,description,location,realDate);
+        holder.bind(imageURL,description,realDate,eventLocation);
     }
 
 
@@ -93,10 +106,13 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
         return mUFCEventsData.length;
     }
 
-    //TODO: delete
     public void setUFCEventsData(JSONObject[] ufcEventsData) {
         mUFCEventsData = ufcEventsData;
         notifyDataSetChanged();
+    }
+
+    public void setUserLocation(Location userLocation){
+        mUserLocation = userLocation;
     }
 
     public class UFCEventViewHolder extends RecyclerView.ViewHolder {
@@ -125,21 +141,32 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
             mEventDate = (TextView) itemView.findViewById(R.id.tv_date);
             mView = itemView;
 
+            TextViewCompat.setAutoSizeTextTypeWithDefaults(mEventDistance,AUTO_SIZE_TEXT_TYPE_UNIFORM);
+            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(mEventDescription,8,18,1,TypedValue.COMPLEX_UNIT_DIP);
+
         }
 
-        void bind(String imageUrl, String description, String location, Date date){
-
-            //Ask if Location Permission is granted
-            if (ContextCompat.checkSelfPermission(mView.getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED){
-                //Permission granted, now calculate the real distance
-                String distance = getDistanceAsString(mView.getContext(),location);
-                if (distance != null){
-                    location = distance;
+        void bind(String imageUrl, String description, Date date, Location eventLocation){
+            String distanceAsString = "";
+            String locationName = eventLocation.getProvider();
+            if(!locationName.equals("null") ){
+                //Ask if Location Permission is granted
+                if (ContextCompat.checkSelfPermission(mView.getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED){
+                    //Permission granted, now calculate the real distance
+                    distanceAsString = getDistanceFromUserAsString(eventLocation);
+                    if (distanceAsString != null){
+                        distanceAsString = distanceAsString.concat(" Km");
+                    }else{
+                        //Show the location city name
+                        distanceAsString = locationName;
+                    }
+                }else{
+                    //Show the location city name
+                    distanceAsString = locationName;
                 }
-            }else{
-                //Nothing, the app will show the city name
             }
+
 
 
 
@@ -160,50 +187,40 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
                 mEventImage.setImageURI(uri);
             }
             mEventDescription.setText(description);
-            mEventDistance.setText(location);
+            mEventDistance.setText(distanceAsString);
             mEventDate.setText(dateString);
         }
     }
 
-    private String getDistanceAsString(Context context, String locationAsString) {
-
-        Address addressFromLocation = getLocationFromCity(context,locationAsString);
-        Location eventLocation = new Location("Evento");
-
-        if (addressFromLocation != null){
-            eventLocation.setLatitude(addressFromLocation.getLatitude());
-            eventLocation.setLongitude(addressFromLocation.getLongitude());
-        }else{
-            return null;
-        }
+    private String getDistanceFromUserAsString(Location locationAsString) {
 
         if(mUserLocation == null || mUserLocation.toString() == "" || mUserLocation.getLatitude() == 0){
             return null;
         }else{
-            float distanceInKm = mUserLocation.distanceTo(eventLocation) /1000;
+            float distanceInKm = mUserLocation.distanceTo(locationAsString) /1000;
             return String.valueOf(distanceInKm);
         }
     }
 
-    public Address getLocationFromCity(Context context, String city){
-
-        Geocoder coder = new Geocoder(context);
-        List<Address> address;
-
-        if (city == null){
-            return null;
-        }
-
-        try {
-            address = coder.getFromLocationName(city,1);
-            if (address == null || address.size()==0){
-                return null;
-            }
-            Address location = address.get(0);
-            return location;
-        } catch (Exception e){
-            e.printStackTrace();
-            return null;
-        }
-    }
+//    public Address getLocationFromCity(Context context, String city){
+//
+//        Geocoder coder = new Geocoder(context);
+//        List<Address> address;
+//
+//        if (city == null){
+//            return null;
+//        }
+//
+//        try {
+//            address = coder.getFromLocationName(city,1);
+//            if (address == null || address.size()==0){
+//                return null;
+//            }
+//            Address location = address.get(0);
+//            return location;
+//        } catch (Exception e){
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 }

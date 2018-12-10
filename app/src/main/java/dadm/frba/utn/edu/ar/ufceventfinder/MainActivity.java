@@ -153,6 +153,11 @@ public class MainActivity extends AppCompatActivity {
                 //Request Location Permission
                 checkLocationPermission();
             }
+
+            //TODO: add lookup for Location and setUserLocation in mAdapter
+//            Location location = new Location("user_location");
+            //look up for real location
+//            mAdapter.setUserLocation(location);
         }
         return super.onOptionsItemSelected(item);
     }

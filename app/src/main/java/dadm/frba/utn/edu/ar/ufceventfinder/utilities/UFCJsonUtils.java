@@ -16,6 +16,8 @@ public final class UFCJsonUtils {
 
         // The event location name, from which you will have to calculate the distance
         final String UFC_location = "location";
+        final String UFC_latitude = "latitude";
+        final String UFC_longitude = "longitude";
 
         // The event image URL/s are these elements of the json. We will need both.
         final String UFC_image_URL = "feature_image";
@@ -23,6 +25,7 @@ public final class UFCJsonUtils {
 
         //The event date
         final String UFC_date = "event_date";
+
 
         JSONObject[] parsedUFCEventsData;
 
@@ -36,6 +39,8 @@ public final class UFCJsonUtils {
             String imageURL;
             String secondImageURL;
             String date;
+            double latitude = 0;
+            double longitude = 0;
 
 
             /* Get the JSON object representing the event */
@@ -51,8 +56,14 @@ public final class UFCJsonUtils {
 
             try {
                 location = singleUFCEvent.getString(UFC_location);
+                if(singleUFCEvent.has(UFC_longitude) && singleUFCEvent.has(UFC_latitude)){
+                    latitude = singleUFCEvent.getDouble(UFC_latitude);
+                    longitude = singleUFCEvent.getDouble(UFC_longitude);
+                }
             }catch(JSONException e){
                 location = "null";
+                latitude = 0;
+                longitude = 0;
                 e.printStackTrace();
             }
 
@@ -76,10 +87,14 @@ public final class UFCJsonUtils {
                 e.printStackTrace();
             }
 
+
+
             JSONObject ufcSingleEventJson = new JSONObject();
             try{
                 ufcSingleEventJson.put("description",description);
                 ufcSingleEventJson.put("location",location);
+                ufcSingleEventJson.put("longitude",longitude);
+                ufcSingleEventJson.put("latitude",latitude);
                 if(imageURL != null){
                     ufcSingleEventJson.put("imageURL",imageURL);
                 }else if(secondImageURL != null){

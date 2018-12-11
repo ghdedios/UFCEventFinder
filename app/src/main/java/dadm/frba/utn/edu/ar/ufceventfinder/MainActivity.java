@@ -182,9 +182,11 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(Location location) {
                                 if (location != null) {
+//                                    if (mCurrentLocation == null){
+//                                        showToast("Location Retrieved",Toast.LENGTH_LONG);
+//                                    }
                                     mCurrentLocation = location;
                                     mAdapter.setUserLocation(mCurrentLocation);
-                                    showToast("Location Retrieved, Please Refresh",Toast.LENGTH_LONG);
                                 }
                             }
                         });
@@ -282,6 +284,7 @@ public class MainActivity extends AppCompatActivity {
                 List<Location> locationList = locationResult.getLocations();
                 if (locationList.size() > 0) {
                     //The last location in the list is the newest
+                    showToast("Location Retrieved",Toast.LENGTH_LONG);
                     Location location = locationList.get(locationList.size() - 1);
                     mCurrentLocation = location;
                 }

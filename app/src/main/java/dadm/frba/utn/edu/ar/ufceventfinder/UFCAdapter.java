@@ -53,7 +53,7 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
         View view = inflater.inflate(layoutIdForListItem, viewGroup, false);
         UFCEventViewHolder viewHolder = new UFCEventViewHolder(view);
 
-        mUserLocation = new Location("User");
+        //mUserLocation = new Location("User");
 
         //Get user location and save it in mUserLocation;
 
@@ -192,7 +192,10 @@ public class UFCAdapter extends RecyclerView.Adapter<UFCAdapter.UFCEventViewHold
 
     private String getDistanceFromUserAsString(Location locationAsString) {
 
-        if (mUserLocation == null || mUserLocation.toString() == "" || mUserLocation.getLatitude() == 0) {
+        if (mUserLocation == null){
+            return null;
+        }
+        if (mUserLocation.toString() == "" || mUserLocation.getLatitude() == 0) {
             return null;
         } else {
             float distanceInKm = mUserLocation.distanceTo(locationAsString) / 1000;

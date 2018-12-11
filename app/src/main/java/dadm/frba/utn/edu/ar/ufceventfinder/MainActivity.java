@@ -163,28 +163,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public Address getLocationFromCity(String city){
-
-        Geocoder coder = new Geocoder(MainActivity.this);
-        List<Address> address;
-
-        if (city == null){
-            return null;
-        }
-
-        try {
-            address = coder.getFromLocationName(city,1);
-            if (address == null || address.size()==0){
-                return null;
-            }
-            Address location = address.get(0);
-            return location;
-        } catch (Exception e){
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     private void checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {

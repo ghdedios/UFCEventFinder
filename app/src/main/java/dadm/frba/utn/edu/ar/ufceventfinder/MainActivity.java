@@ -3,8 +3,6 @@ package dadm.frba.utn.edu.ar.ufceventfinder;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
@@ -23,11 +21,16 @@ import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
@@ -56,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Location mCurrentLocation;
     private LocationRequest mLocationRequest;
+    private LocationCallback mLocationCallback;
 
 
     @Override
@@ -80,9 +84,17 @@ public class MainActivity extends AppCompatActivity {
         createLocationRequest();
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(mLocationRequest);
-//        SettingsClient client = LocationServices.getSettingsClient(this);
-//        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+        mLocationCallback = this.initiateLocationCallback();
 
+    }
+
+    public void onPause() {
+        super.onPause();
+
+        //stop location updates when Activity is no longer active
+        if (mFusedLocationClient != null) {
+            mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        }
     }
 
 
@@ -162,6 +174,9 @@ public class MainActivity extends AppCompatActivity {
                 //Location Permission already granted
 
                 //Update Location
+                mFusedLocationClient.requestLocationUpdates(mLocationRequest,mLocationCallback,null);
+
+                //Get last Location
                 mFusedLocationClient.getLastLocation()
                         .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                             @Override
@@ -181,11 +196,6 @@ public class MainActivity extends AppCompatActivity {
                 //Request Location Permission
                 checkLocationPermission();
             }
-
-            //TODO: add lookup for Location and setUserLocation in mAdapter
-//            Location location = new Location("user_location");
-            //look up for real location
-//            mAdapter.setUserLocation(location);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -224,10 +234,12 @@ public class MainActivity extends AppCompatActivity {
 
     protected void createLocationRequest() {
         LocationRequest mLocationRequestTemp = new LocationRequest();
-        mLocationRequest.setInterval(120000);
-        mLocationRequest.setFastestInterval(10000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        mLocationRequestTemp.setInterval(120000);
+        mLocationRequestTemp.setFastestInterval(60000);
+        mLocationRequestTemp.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
         mLocationRequest = mLocationRequestTemp;
+
+
     }
 
 
@@ -263,5 +275,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private LocationCallback initiateLocationCallback(){
+        LocationCallback mLocationCallbackToReturn = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                List<Location> locationList = locationResult.getLocations();
+                if (locationList.size() > 0) {
+                    //The last location in the list is the newest
+                    Location location = locationList.get(locationList.size() - 1);
+                    mCurrentLocation = location;
+                }
+            }
+        };
+        return mLocationCallbackToReturn;
+    }
 
 }

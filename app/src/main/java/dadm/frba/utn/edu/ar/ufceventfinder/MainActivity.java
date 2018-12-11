@@ -23,8 +23,13 @@ import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
     private FusedLocationProviderClient mFusedLocationClient;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
+    private Location mCurrentLocation;
+    private LocationRequest mLocationRequest;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +77,11 @@ public class MainActivity extends AppCompatActivity {
         mUFCEventsList.setAdapter(mAdapter);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        createLocationRequest();
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(mLocationRequest);
+//        SettingsClient client = LocationServices.getSettingsClient(this);
+//        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
 
     }
 
@@ -125,7 +138,6 @@ public class MainActivity extends AppCompatActivity {
             if (UFCEventsResult != null) {
                 showUFCEvents();
                 mAdapter.setUFCEventsData(UFCEventsResult);
-               // mUFCEventsResults.setText(UFCEventsResult[0].toString());
             } else {
                 showErrorMessage();
             }
@@ -155,7 +167,9 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(Location location) {
                                 if (location != null) {
-                                    mAdapter.setUserLocation(location);
+                                    mCurrentLocation = location;
+                                    mAdapter.setUserLocation(mCurrentLocation);
+                                    showToast("Location Retrieved, Please Refresh",Toast.LENGTH_LONG);
                                 }
                             }
                         });
@@ -206,6 +220,20 @@ public class MainActivity extends AppCompatActivity {
                         MY_PERMISSIONS_REQUEST_LOCATION );
             }
         }
+    }
+
+    protected void createLocationRequest() {
+        LocationRequest mLocationRequestTemp = new LocationRequest();
+        mLocationRequest.setInterval(120000);
+        mLocationRequest.setFastestInterval(10000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        mLocationRequest = mLocationRequestTemp;
+    }
+
+
+    public void showToast(String text, int length){
+        Toast.makeText(this,text,length).show();
+        return;
     }
 
     @Override

@@ -60,6 +60,9 @@ public final class UFCJsonUtils {
                     latitude = singleUFCEvent.getDouble(UFC_latitude);
                     longitude = singleUFCEvent.getDouble(UFC_longitude);
                 }
+                if (latitude == 0 && longitude == 0){
+                    location = "null";
+                }
             }catch(JSONException e){
                 location = "null";
                 latitude = 0;

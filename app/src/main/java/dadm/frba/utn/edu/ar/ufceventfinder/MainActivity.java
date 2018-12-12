@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private Location mCurrentLocation;
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
+    private boolean alreadyRetreivedLocation;
 
 
     @Override
@@ -85,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(mLocationRequest);
         mLocationCallback = this.initiateLocationCallback();
+
+        alreadyRetreivedLocation = false;
 
     }
 
@@ -182,9 +185,6 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(Location location) {
                                 if (location != null) {
-//                                    if (mCurrentLocation == null){
-//                                        showToast("Location Retrieved",Toast.LENGTH_LONG);
-//                                    }
                                     mCurrentLocation = location;
                                     mAdapter.setUserLocation(mCurrentLocation);
                                 }
@@ -284,7 +284,10 @@ public class MainActivity extends AppCompatActivity {
                 List<Location> locationList = locationResult.getLocations();
                 if (locationList.size() > 0) {
                     //The last location in the list is the newest
-                    showToast("Location Retrieved",Toast.LENGTH_LONG);
+                    if (!alreadyRetreivedLocation){
+                        showToast("Location Retrieved",Toast.LENGTH_LONG);
+                        alreadyRetreivedLocation = true;
+                    }
                     Location location = locationList.get(locationList.size() - 1);
                     mCurrentLocation = location;
                 }
